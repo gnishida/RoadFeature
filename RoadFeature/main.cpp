@@ -20,8 +20,17 @@ int main(int argc, char *argv[]) {
 	GraphUtil::loadRoads(r, argv[1]);
 
 	// エッジ長のヒストグラムを作成
-	cv::MatND histEdgeLength;
-	histEdgeLength = GraphUtil::computeEdgeLengthHistogram(r);
+	cv::Mat hist;
+	GraphUtil::computeHistogram(r, hist);
 
-	std::cout << histEdgeLength << std::endl;
+	// １列にreduceすれば、角度のヒストグラムになる。
+	cv::Mat histDir;
+	cv::reduce(hist, histDir, CV_REDUCE_SUM, 0);
+
+	for (int i = 0; i < hist.rows; i++) {
+		for (int j = 0; j < hist.cols; j++) {
+			std::cout << hist.at<float>(i, j) << ",";
+		}
+		std::cout << std::endl;
+	}
 }
