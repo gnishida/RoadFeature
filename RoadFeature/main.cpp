@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
 	int size = atoi(argv[2]);
 	int cellSize = atoi(argv[3]);
 
-	for (int v = 0; v < size; v += cellSize) {
-		for (int u = 0; u < size; u += cellSize) {
+	for (int v = -size/2; v < size/2; v += cellSize) {
+		for (int u = -size/2; u < size/2; u += cellSize) {
 			BBox box(QVector2D(u, v));
 			box.addPoint(QVector2D(u + cellSize, v + cellSize));
 
