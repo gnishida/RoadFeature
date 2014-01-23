@@ -9,28 +9,43 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include "GraphUtil.h"
+#include "BBox.h"
 
 int main(int argc, char *argv[]) {
-	if (argc < 2) {
-		std::cout << "Usage: RoadFeature <GSM file>" << std::endl;
+	if (argc < 4) {
+		std::cout << "Usage: RoadFeature <GSM file> <size> <cell size>" << std::endl;
 		return 1;
 	}
 
 	RoadGraph r;
 	GraphUtil::loadRoads(r, argv[1]);
 
-	// エッジ長のヒストグラムを作成
-	cv::Mat hist;
-	GraphUtil::computeHistogram(r, hist);
+	int size = atoi(argv[2]);
+	int cellSize = atoi(argv[3]);
 
-	// １列にreduceすれば、角度のヒストグラムになる。
-	cv::Mat histDir;
-	cv::reduce(hist, histDir, CV_REDUCE_SUM, 0);
+	for (int v = 0; v < size; v += cellSize) {
+		for (int u = 0; u < size; u += cellSize) {
+			BBox box(QVector2D(u, v));
+			box.addPoint(QVector2D(u + cellSize, v + cellSize));
 
-	for (int i = 0; i < hist.rows; i++) {
-		for (int j = 0; j < hist.cols; j++) {
-			std::cout << hist.at<float>(i, j) << ",";
+			// セルの道路網を抽出
+			RoadGraph patch;
+			GraphUtil::copyRoads(r, patch);
+			GraphUtil::extractRoads(patch, box, true);
+
+			// セルの道路網のヒストグラムを作成
+			cv::Mat hist;
+			GraphUtil::computeHistogram(patch, hist);
+
+			// 出力
+			for (int i = 0; i < hist.rows; i++) {
+				for (int j = 0; j < hist.cols; j++) {
+					std::cout << hist.at<float>(i, j) << ",";
+				}
+				std::cout << std::endl;
+			}
+			std::cout << std::endl;
+			std::cout << std::endl;
 		}
-		std::cout << std::endl;
 	}
 }
